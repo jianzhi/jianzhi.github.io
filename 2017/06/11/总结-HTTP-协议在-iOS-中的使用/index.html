@@ -11,7 +11,7 @@
     
 
     
-    <meta name="description" content="总结 HTTP 协议在 iOS 中的使用平时开发中总免不了与 HTTP 网络请求打交道，在此做个总结。
+    <meta name="description" content="平时开发中总免不了与 HTTP 网络请求打交道，在此做个总结。
 客户端与服务端通过 HTTP 协议通讯，客户端会发送请求信息，格式如下：
 
 
@@ -42,12 +42,12 @@ CRLF
 
 
 
-请求消息由请求行，请求头，请求体">
+请求消息由请求行，请求头，请求体三部分组成，请求体是可选的，不一定有，C">
 <meta property="og:type" content="article">
 <meta property="og:title" content="总结 HTTP 协议在 iOS 中的使用">
 <meta property="og:url" content="https://jianzhi.github.io/2017/06/11/总结-HTTP-协议在-iOS-中的使用/index.html">
 <meta property="og:site_name" content="Joey 的吉光片羽">
-<meta property="og:description" content="总结 HTTP 协议在 iOS 中的使用平时开发中总免不了与 HTTP 网络请求打交道，在此做个总结。
+<meta property="og:description" content="平时开发中总免不了与 HTTP 网络请求打交道，在此做个总结。
 客户端与服务端通过 HTTP 协议通讯，客户端会发送请求信息，格式如下：
 
 
@@ -78,11 +78,11 @@ CRLF
 
 
 
-请求消息由请求行，请求头，请求体">
-<meta property="og:updated_time" content="2017-06-11T13:42:29.000Z">
+请求消息由请求行，请求头，请求体三部分组成，请求体是可选的，不一定有，C">
+<meta property="og:updated_time" content="2017-06-11T13:43:43.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="总结 HTTP 协议在 iOS 中的使用">
-<meta name="twitter:description" content="总结 HTTP 协议在 iOS 中的使用平时开发中总免不了与 HTTP 网络请求打交道，在此做个总结。
+<meta name="twitter:description" content="平时开发中总免不了与 HTTP 网络请求打交道，在此做个总结。
 客户端与服务端通过 HTTP 协议通讯，客户端会发送请求信息，格式如下：
 
 
@@ -113,7 +113,7 @@ CRLF
 
 
 
-请求消息由请求行，请求头，请求体">
+请求消息由请求行，请求头，请求体三部分组成，请求体是可选的，不一定有，C">
 
     
     <link rel="alternative" href="/atom.xml" title="Joey 的吉光片羽" type="application/atom+xml">
@@ -141,7 +141,7 @@ CRLF
 				<h1 class="site-name"><a href="/" title="Joey 的吉光片羽">Joey 的吉光片羽</a></h1>
 				<h2 class="blog-motto">睁眼看世界</h2>
 			</div>
-			<div class="navbar"><a class="navbutton navmobile" href="#" title="Menu">
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
 			</a></div>
 			<nav class="animated">
 				<ul>
@@ -157,7 +157,7 @@ CRLF
  					
 					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
 						<label>Search</label>
-						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="Search" />
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
 						<input type="hidden" name="q" value="site:jianzhi.github.io">
 					</form>
 					
@@ -180,20 +180,20 @@ CRLF
 		<a href="/about" title="Joey" target="_blank" itemprop="author">Joey</a>
 		
   <p class="article-time">
-    <time datetime="2017-06-11T13:41:37.000Z" itemprop="datePublished"> Published 2017-06-11</time>
+    <time datetime="2017-06-11T13:41:37.000Z" itemprop="datePublished"> 发表于 2017-06-11</time>
     
   </p>
 </header>
 	<div class="article-content">
 		
 		<div id="toc" class="toc-article">
-			<strong class="toc-title">Contents</strong>
+			<strong class="toc-title">文章目录</strong>
 		
-			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#总结-HTTP-协议在-iOS-中的使用"><span class="toc-number">1.</span> <span class="toc-text">总结 HTTP 协议在 iOS 中的使用</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#请求行"><span class="toc-number">1.0.1.</span> <span class="toc-text">请求行</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#请求头"><span class="toc-number">1.0.2.</span> <span class="toc-text">请求头</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#请求体"><span class="toc-number">1.0.3.</span> <span class="toc-text">请求体</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#未完待续"><span class="toc-number">1.0.3.1.</span> <span class="toc-text">未完待续</span></a></li></ol></li></ol></li></ol></li></ol>
+			<ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#请求行"><span class="toc-number">1.</span> <span class="toc-text">请求行</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#请求头"><span class="toc-number">2.</span> <span class="toc-text">请求头</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#请求体"><span class="toc-number">3.</span> <span class="toc-text">请求体</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#未完待续"><span class="toc-number">3.1.</span> <span class="toc-text">未完待续</span></a></li></ol></li></ol>
 		
 		</div>
 		
-		<h2 id="总结-HTTP-协议在-iOS-中的使用"><a href="#总结-HTTP-协议在-iOS-中的使用" class="headerlink" title="总结 HTTP 协议在 iOS 中的使用"></a>总结 HTTP 协议在 iOS 中的使用</h2><p>平时开发中总免不了与 HTTP 网络请求打交道，在此做个总结。</p>
+		<p>平时开发中总免不了与 HTTP 网络请求打交道，在此做个总结。</p>
 <p>客户端与服务端通过 HTTP 协议通讯，客户端会发送请求信息，格式如下：</p>
 <table>
 <thead>
@@ -330,7 +330,7 @@ CRLF
 
   <div class="article-tags">
   
-  <span></span> <a href="/tags/HTTP/">HTTP</a>
+  <span></span> <a href="/tags/HTTP-iOS/">HTTP , iOS</a>
   </div>
 
 </div>
@@ -366,17 +366,17 @@ CRLF
 	
 
 </div>  
-      <div class="openaside"><a class="navbutton" href="#" title="Show Sidebar"></a></div>
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
 
   <div id="toc" class="toc-aside">
-  <strong class="toc-title">Contents</strong>
+  <strong class="toc-title">文章目录</strong>
  
- <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#总结-HTTP-协议在-iOS-中的使用"><span class="toc-number">1.</span> <span class="toc-text">总结 HTTP 协议在 iOS 中的使用</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#请求行"><span class="toc-number">1.0.1.</span> <span class="toc-text">请求行</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#请求头"><span class="toc-number">1.0.2.</span> <span class="toc-text">请求头</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#请求体"><span class="toc-number">1.0.3.</span> <span class="toc-text">请求体</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#未完待续"><span class="toc-number">1.0.3.1.</span> <span class="toc-text">未完待续</span></a></li></ol></li></ol></li></ol></li></ol>
+ <ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#请求行"><span class="toc-number">1.</span> <span class="toc-text">请求行</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#请求头"><span class="toc-number">2.</span> <span class="toc-text">请求头</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#请求体"><span class="toc-number">3.</span> <span class="toc-text">请求体</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#未完待续"><span class="toc-number">3.1.</span> <span class="toc-text">未完待续</span></a></li></ol></li></ol>
  
   </div>
 
 <div id="asidepart">
-<div class="closeaside"><a class="closebutton" href="#" title="Hide Sidebar"></a></div>
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
 <aside class="clearfix">
 
   
@@ -384,7 +384,7 @@ CRLF
 
   
 <div class="categorieslist">
-	<p class="asidetitle">Categories</p>
+	<p class="asidetitle">分类</p>
 		<ul>
 		
 		  
@@ -401,7 +401,7 @@ CRLF
 
   
 <div class="tagslist">
-	<p class="asidetitle">Tags</p>
+	<p class="asidetitle">标签</p>
 		<ul class="clearfix">
 		
 			
@@ -409,7 +409,9 @@ CRLF
 			
 		
 			
-				<li><a href="/tags/HTTP/" title="HTTP">HTTP<sup>1</sup></a></li>
+				<li><a href="/tags/HTTP-iOS/" title="HTTP , iOS">HTTP , iOS<sup>1</sup></a></li>
+			
+		
 			
 		
 		</ul>
@@ -417,7 +419,7 @@ CRLF
 
 
   <div class="linkslist">
-  <p class="asidetitle">Links</p>
+  <p class="asidetitle">友情链接</p>
     <ul>
         
           <li>
@@ -433,11 +435,11 @@ CRLF
 
 
   <div class="rsspart">
-	<a href="/atom.xml" target="_blank" title="rss">RSS</a>
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
 </div>
 
   <div class="weiboshow">
-  <p class="asidetitle">Weibo</p>
+  <p class="asidetitle">新浪微博</p>
     <iframe width="100%" height="119" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=119&fansRow=2&ptype=1&speed=0&skin=9&isTitle=1&noborder=1&isWeibo=0&isFans=0&uid=null&verifier=&dpc=1"></iframe>
 </div>
 
@@ -662,7 +664,7 @@ var _hmt = _hmt || [];
 <!-- Totop Begin -->
 
 	<div id="totop">
-	<a title="Back to Top"><img src="/img/scrollup.png"/></a>
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
 	</div>
 	<script src="/js/totop.js"></script>
 
