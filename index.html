@@ -81,6 +81,189 @@
         <header class="article-info clearfix">
   <h1 itemprop="name">
     
+      <a href="/2017/06/11/总结-HTTP-协议在-iOS-中的使用/" title="总结 HTTP 协议在 iOS 中的使用" itemprop="url">总结 HTTP 协议在 iOS 中的使用</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Joey" target="_blank" itemprop="author">Joey</a>
+		
+  <p class="article-time">
+    <time datetime="2017-06-11T13:41:37.000Z" itemprop="datePublished"> Published 2017-06-11</time>
+    
+  </p>
+</header>
+    <div class="article-content">
+        
+        <h2 id="总结-HTTP-协议在-iOS-中的使用"><a href="#总结-HTTP-协议在-iOS-中的使用" class="headerlink" title="总结 HTTP 协议在 iOS 中的使用"></a>总结 HTTP 协议在 iOS 中的使用</h2><p>平时开发中总免不了与 HTTP 网络请求打交道，在此做个总结。</p>
+<p>客户端与服务端通过 HTTP 协议通讯，客户端会发送请求信息，格式如下：</p>
+<table>
+<thead>
+<tr>
+<th>请求消息（Request Message）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>请求行（Request Line）</td>
+<td></td>
+</tr>
+<tr>
+<td>CRLF</td>
+<td></td>
+</tr>
+<tr>
+<td>请求头（Header）</td>
+<td></td>
+</tr>
+<tr>
+<td>CRLF</td>
+<td></td>
+</tr>
+<tr>
+<td>请求体（Body）</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>请求消息由请求行，请求头，请求体三部分组成，请求体是可选的，不一定有，CRLF是换行符 <code>\r\n</code>。</p>
+<p>服务端响应的格式与请求消息类似，格式如下：</p>
+<table>
+<thead>
+<tr>
+<th>响应消息（Response Message）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>响应行（Status Line）</td>
+<td></td>
+</tr>
+<tr>
+<td>CRLF</td>
+<td></td>
+</tr>
+<tr>
+<td>响应头（Header）</td>
+<td></td>
+</tr>
+<tr>
+<td>CRLF</td>
+<td></td>
+</tr>
+<tr>
+<td>响应体（Body）</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>举个例子，使用百度搜索<code>bilibili 动画</code>时，浏览器地址栏显示为 <code>https://www.baidu.com/s?wd=bilibili%20动画</code>，请求消息为：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">GET /s?wd=bilibili%20%E5%8A%A8%E7%94%BB HTTP/1.1</div><div class="line">Host: www.baidu.com</div></pre></td></tr></table></figure>
+<h4 id="请求行"><a href="#请求行" class="headerlink" title="请求行"></a>请求行</h4><p>由上面看出，请求行的格式是：</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Request-URI</th>
+<th>HTTP-Version</th>
+<th>CRLF</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>请求行的数据编码格式必须为 <code>ASCII</code> 编码，分为所以请求地址带有中文的时候，会进行 UrlEncode ，而且有些特殊的字符虽然列在<code>ASCII</code>编码表中（例如空格0x20），但还是需要进行 UrlEncode ， Encode 的结果就是由<code>%</code>和安全的<code>ASCII</code>码组合而成。<br>上面的例子中，空格编码为<code>%20</code>，动画两个字就被编码为<code>%E5%8A%A8%E7%94%BB</code>。</p>
+<p>在 iOS 网络框架 AFNetWorking 中，会对请求参数进行编码得到 percent-escaped 字符：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">NSString * AFPercentEscapedStringFromString(NSString *string) &#123;</div><div class="line">    static NSString * const kAFCharactersGeneralDelimitersToEncode = @&quot;:#[]@&quot;; // does not include &quot;?&quot; or &quot;/&quot; due to RFC 3986 - Section 3.4</div><div class="line">    static NSString * const kAFCharactersSubDelimitersToEncode = @&quot;!$&amp;&apos;()*+,;=&quot;;</div><div class="line"></div><div class="line">    NSMutableCharacterSet * allowedCharacterSet = [[NSCharacterSet URLQueryAllowedCharacterSet] mutableCopy];</div><div class="line">    [allowedCharacterSet removeCharactersInString:[kAFCharactersGeneralDelimitersToEncode stringByAppendingString:kAFCharactersSubDelimitersToEncode]];</div><div class="line">    return [string stringByAddingPercentEncodingWithAllowedCharacters:allowedCharacterSet];</div><div class="line">    ....</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h4 id="请求头"><a href="#请求头" class="headerlink" title="请求头"></a>请求头</h4><p>请求头的格式就是文本键值对的形式， header 字段有很多，可分为常用首部字段（General Header Fields）和请求首部字段（Request Header Fields），常用首部字段是请求报文和响应报文中都会使用的首部字段，请求首部字段是客户端发送请求时使用的。挑些重要的的说一下：</p>
+<ul>
+<li><p>Connection</p>
+<p>在 HTTP 早期版本中，每进行完一次 HTTP 通信就会断开 TCP 连接，下次请求数据就要重新建立 TCP 连接，性能较差；<br>现在 HTTP/1.1 版本中默认都是持久连接（persistent connection）：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">Connection: keep-alive</div></pre></td></tr></table></figure>
+<p>表示 TCP 连接不关闭，多次请求可复用同一个 TCP 连接，而不必每次请求数据都要重新建立 TCP 连接。</p>
+</li>
+<li><p>Cache-Control</p>
+<p>通常这个字段都会设置为<code>no-cache</code>:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">Cache-Control:no-cache</div></pre></td></tr></table></figure>
+<p><code>no-cahe</code>并不是指不缓存，而是表示需与服务器确认返回的响应是否发生了变化，防止从缓存中返回过期的资源；<br>这个字段还可以设置为<code>no-store</code>，表示不缓存响应，禁止浏览器以及所有中间缓存存储返回的响应；<br>设置<code>max-age</code>表示缓存响应的最长时间（单位：秒）；</p>
+</li>
+<li><p>If-Modified-Since</p>
+<p>如果请求的资源在 If-Modified-Since 字段值指定的日期时间之后没有改变，服务端会返回状态码 304 Not Modified 的响应，且响应body为空。有些情况是服务端返回请求资源的 Last-Modified 值，客户端下次请求时就会在 If-Modified-Since 字段带上 Last-Modified 值。</p>
+</li>
+<li><p>If-Match</p>
+<p>服务器可通过某种算法给资源生成唯一标志符（该资源内容发生了改变会生成新的标志符），在响应客户端请求时，把资源的标志符也传过去，例如:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">ETag:&quot;55648df6-515&quot;</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>  客户端下次请求该资源时，可在 If-Match 上带上该 Etag 值，服务端收到请求，拿服务端资源的 Etag 值与客户端传过来的 Etag 值作比较，不相同则返回状态码 200 及新资源；相同则返回状态码304告诉客户端使用本地缓存。<br>  应用场景有：比如客户端缓存了一张头像图片，后来服务端该资源已经变了，换了一张图片，但是 URL 链接不变，此时通过 ETag 值比较便会返回客户端最新的图片资源。</p>
+<ul>
+<li><p>Range</p>
+<p>客户端可以指定请求资源的某部分数据，如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">Range: bytes=0-10000</div></pre></td></tr></table></figure>
+<p>服务端接收到请求，若能按照要求处理则返回状态码 206 Partial Content 的响应；否则返回状态码 200 及全部资源数据。这个字段常用于断点续传。</p>
+</li>
+</ul>
+<p>在 AFNetworking 中，初始化 HTTP 请求时就会设置一些 header 信息，例如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">//AFHTTPRequestSerializer</div><div class="line"></div><div class="line">[self setValue:[acceptLanguagesComponents componentsJoinedByString:@&quot;, &quot;] forHTTPHeaderField:@&quot;Accept-Language&quot;];</div><div class="line">...</div><div class="line">[self setValue:userAgent forHTTPHeaderField:@&quot;User-Agent&quot;];</div></pre></td></tr></table></figure>
+<h4 id="请求体"><a href="#请求体" class="headerlink" title="请求体"></a>请求体</h4><p>HTTP 协议中对 body 的内容编码没有作约束，由协议使用者作决定，body 中使用二进制流也是没问题的，对应的 Content-Type 为 application/octet-stream. 常用的 Content-Type 有以下几种:</p>
+<ul>
+<li>application/x-www-form-urlencoded</li>
+<li>application/json</li>
+<li>multipart/form-data</li>
+</ul>
+<p>在 AFNetworking 中，如果我们的 request 没有设置 Content-Type ，且 body 中带有数据，就会默认使用<code>application/x-www-form-urlencoded</code>:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">//AFHTTPRequestSerializer</div><div class="line">if (![mutableRequest valueForHTTPHeaderField:@&quot;Content-Type&quot;]) &#123;</div><div class="line">    [mutableRequest setValue:@&quot;application/x-www-form-urlencoded&quot; forHTTPHeaderField:@&quot;Content-Type&quot;];</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><code>application/x-www-form-urlencoded</code>编码就是上面所说的UrlEncode，只不过这里是对 body 中的内容进行编码。</p>
+<p>如果需要上传文件，我们一般会选择 <code>multipart/form-data</code>，AFNetworking 中是这么处理的：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">- (NSMutableURLRequest *)requestByFinalizingMultipartFormData &#123;</div><div class="line">    if ([self.bodyStream isEmpty]) &#123;</div><div class="line">        return self.request;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    // Reset the initial and final boundaries to ensure correct Content-Length</div><div class="line">    [self.bodyStream setInitialAndFinalBoundaries];</div><div class="line">    [self.request setHTTPBodyStream:self.bodyStream];</div><div class="line"></div><div class="line">    [self.request setValue:[NSString stringWithFormat:@&quot;multipart/form-data; boundary=%@&quot;, self.boundary] forHTTPHeaderField:@&quot;Content-Type&quot;];</div><div class="line">    [self.request setValue:[NSString stringWithFormat:@&quot;%llu&quot;, [self.bodyStream contentLength]] forHTTPHeaderField:@&quot;Content-Length&quot;];</div><div class="line"></div><div class="line">    return self.request;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>至于为什么文件上传选择使用 <code>multipart/form-data</code>，<a href="http://mrpeak.cn/blog/http-constitution/">这篇文章</a>已经说的比较清楚，另外就是使用<code>multipart/form-data</code>能发送多种类型的数据。</p>
+<h5 id="未完待续"><a href="#未完待续" class="headerlink" title="未完待续"></a>未完待续</h5><ul>
+<li>……</li>
+</ul>
+<p>#####参考<br><a href="http://mrpeak.cn/blog/http-constitution/">扒一扒HTTP的构成</a><br><a href="https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol">HTTP 协议介绍</a></p>
+
+        
+        
+        <p class="article-more-link">
+          
+       </p>
+    </div>
+    <footer class="article-footer clearfix">
+<div class="article-catetags">
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/HTTP/">HTTP</a>
+  </div>
+
+</div>
+
+
+
+
+<div class="comments-count">
+	
+</div>
+
+</footer>
+
+
+    </article>
+
+
+
+
+
+
+   
+    
+    <article class="post-expand post" itemprop="articleBody"> 
+        <header class="article-info clearfix">
+  <h1 itemprop="name">
+    
       <a href="/2017/06/04/iOS-知识杂锦/" title="iOS 知识杂锦" itemprop="url">iOS 知识杂锦</a>
   </h1>
   <p class="article-author">By
@@ -132,6 +315,11 @@
     </div>
     <footer class="article-footer clearfix">
 <div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/iOS编程/">iOS编程</a>
+</div>
 
 
   <div class="article-tags">
@@ -752,6 +940,10 @@
 		<ul>
 		
 		  
+			<li><a href="/categories/iOS编程/" title="iOS编程">iOS编程<sup>1</sup></a></li>
+		  
+		
+		  
 			<li><a href="/categories/生活/" title="生活">生活<sup>2</sup></a></li>
 		  
 		
@@ -766,6 +958,10 @@
 		
 			
 				<li><a href="/tags/iOS/" title="iOS">iOS<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/HTTP/" title="HTTP">HTTP<sup>1</sup></a></li>
 			
 		
 		</ul>
