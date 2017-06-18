@@ -79,7 +79,7 @@ CRLF
 
 
 请求消息由请求行，请求头，请求体三部分组成，请求体是可选的，不一定有，C">
-<meta property="og:updated_time" content="2017-06-11T13:43:43.000Z">
+<meta property="og:updated_time" content="2017-06-18T14:23:33.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="总结 HTTP 协议在 iOS 中的使用">
 <meta name="twitter:description" content="平时开发中总免不了与 HTTP 网络请求打交道，在此做个总结。
@@ -141,7 +141,7 @@ CRLF
 				<h1 class="site-name"><a href="/" title="Joey 的吉光片羽">Joey 的吉光片羽</a></h1>
 				<h2 class="blog-motto">睁眼看世界</h2>
 			</div>
-			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="Menu">
 			</a></div>
 			<nav class="animated">
 				<ul>
@@ -157,7 +157,7 @@ CRLF
  					
 					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
 						<label>Search</label>
-						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="Search" />
 						<input type="hidden" name="q" value="site:jianzhi.github.io">
 					</form>
 					
@@ -180,16 +180,16 @@ CRLF
 		<a href="/about" title="Joey" target="_blank" itemprop="author">Joey</a>
 		
   <p class="article-time">
-    <time datetime="2017-06-11T13:41:37.000Z" itemprop="datePublished"> 发表于 2017-06-11</time>
+    <time datetime="2017-06-11T13:41:37.000Z" itemprop="datePublished"> Published 2017-06-11</time>
     
   </p>
 </header>
 	<div class="article-content">
 		
 		<div id="toc" class="toc-article">
-			<strong class="toc-title">文章目录</strong>
+			<strong class="toc-title">Contents</strong>
 		
-			<ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#请求行"><span class="toc-number">1.</span> <span class="toc-text">请求行</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#请求头"><span class="toc-number">2.</span> <span class="toc-text">请求头</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#请求体"><span class="toc-number">3.</span> <span class="toc-text">请求体</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#未完待续"><span class="toc-number">3.1.</span> <span class="toc-text">未完待续</span></a></li></ol></li></ol>
+			<ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#请求行"><span class="toc-number">1.</span> <span class="toc-text">请求行</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#请求头"><span class="toc-number">2.</span> <span class="toc-text">请求头</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#请求体"><span class="toc-number">3.</span> <span class="toc-text">请求体</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#HTTP-2"><span class="toc-number">4.</span> <span class="toc-text">HTTP/2</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#未完待续"><span class="toc-number">4.1.</span> <span class="toc-text">未完待续</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#参考"><span class="toc-number">4.2.</span> <span class="toc-text">参考</span></a></li></ol></li></ol>
 		
 		</div>
 		
@@ -281,7 +281,8 @@ CRLF
 <li><p>Connection</p>
 <p>在 HTTP 早期版本中，每进行完一次 HTTP 通信就会断开 TCP 连接，下次请求数据就要重新建立 TCP 连接，性能较差；<br>现在 HTTP/1.1 版本中默认都是持久连接（persistent connection）：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">Connection: keep-alive</div></pre></td></tr></table></figure>
-<p>表示 TCP 连接不关闭，多次请求可复用同一个 TCP 连接，而不必每次请求数据都要重新建立 TCP 连接。</p>
+<p>表示 TCP 连接不关闭，多次请求可复用同一个 TCP 连接，而不必每次请求数据都要重新建立 TCP 连接。<br>另外 HTTP/1.1 版本还引入了管道机制（pipelining）：客户端在同一个 TCP 连接中可以同时发送多个请求，进一步提高效率，但是服务端还是得按照请求顺序依次返回响应消息。这样会出现一个问题，当第一个请求的响应特别慢，那么后面的请求都在排队干等着，这被称为”队头堵塞”（Head-of-line blocking）。</p>
+<p>在 iOS 的 网络请求类 <code>NSURLRequest</code> 中，有着对应的属性 <code>HTTPShouldUsePipelining</code> 设置开启使用管道，但是文档中说明了即便设置了该属性也未必生效，还需要服务端配合支持。</p>
 </li>
 <li><p>Cache-Control</p>
 <p>通常这个字段都会设置为<code>no-cache</code>:</p>
@@ -318,10 +319,18 @@ CRLF
 <p>如果需要上传文件，我们一般会选择 <code>multipart/form-data</code>，AFNetworking 中是这么处理的：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">- (NSMutableURLRequest *)requestByFinalizingMultipartFormData &#123;</div><div class="line">    if ([self.bodyStream isEmpty]) &#123;</div><div class="line">        return self.request;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    // Reset the initial and final boundaries to ensure correct Content-Length</div><div class="line">    [self.bodyStream setInitialAndFinalBoundaries];</div><div class="line">    [self.request setHTTPBodyStream:self.bodyStream];</div><div class="line"></div><div class="line">    [self.request setValue:[NSString stringWithFormat:@&quot;multipart/form-data; boundary=%@&quot;, self.boundary] forHTTPHeaderField:@&quot;Content-Type&quot;];</div><div class="line">    [self.request setValue:[NSString stringWithFormat:@&quot;%llu&quot;, [self.bodyStream contentLength]] forHTTPHeaderField:@&quot;Content-Length&quot;];</div><div class="line"></div><div class="line">    return self.request;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p>至于为什么文件上传选择使用 <code>multipart/form-data</code>，<a href="http://mrpeak.cn/blog/http-constitution/">这篇文章</a>已经说的比较清楚，另外就是使用<code>multipart/form-data</code>能发送多种类型的数据。</p>
+<h4 id="HTTP-2"><a href="#HTTP-2" class="headerlink" title="HTTP/2"></a>HTTP/2</h4><p>为了解决 HTTP／1.1 协议的缺点，谷歌率先研发推出了 SPDY 协议方案，接着 HTTP/2 协议在 SPDY 基础上再修修改改，带来了几个重大新特性：</p>
+<ul>
+<li>二进制编码格式，HTTP／1.x 的解析是基于文本，HTTP／2 协议规定了 HTTP 通信消息使用二进制格式编码，使用二进制编码更方便健壮；</li>
+<li>多路复用（MultiPlexing），多个请求或响应能同时在一个 TCP 连接上发送，并且不需要按照顺序一一对应，避免了队首阻塞；</li>
+<li>header压缩， 使用 HPACK 压缩格式压缩请求和响应头数据，而且通讯双方各自缓存一份 header fields 表；</li>
+<li>服务端推送，服务器可以对一个客户端请求发送多个响应；</li>
+</ul>
+<p>现状，一般大型网站的静态资源请求支持 HTTP/2 协议了，其它的还是 HTTP/1.1。</p>
 <h5 id="未完待续"><a href="#未完待续" class="headerlink" title="未完待续"></a>未完待续</h5><ul>
 <li>……</li>
 </ul>
-<p>#####参考<br><a href="http://mrpeak.cn/blog/http-constitution/">扒一扒HTTP的构成</a><br><a href="https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol">HTTP 协议介绍</a></p>
+<h5 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h5><p><a href="http://mrpeak.cn/blog/http-constitution/">扒一扒HTTP的构成</a><br><a href="https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol">HTTP 协议介绍</a><br><a href="https://developers.google.com/web/fundamentals/performance/http2/">HTTP 2简介</a></p>
   
 	</div>
 		<footer class="article-footer clearfix">
@@ -366,17 +375,17 @@ CRLF
 	
 
 </div>  
-      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+      <div class="openaside"><a class="navbutton" href="#" title="Show Sidebar"></a></div>
 
   <div id="toc" class="toc-aside">
-  <strong class="toc-title">文章目录</strong>
+  <strong class="toc-title">Contents</strong>
  
- <ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#请求行"><span class="toc-number">1.</span> <span class="toc-text">请求行</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#请求头"><span class="toc-number">2.</span> <span class="toc-text">请求头</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#请求体"><span class="toc-number">3.</span> <span class="toc-text">请求体</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#未完待续"><span class="toc-number">3.1.</span> <span class="toc-text">未完待续</span></a></li></ol></li></ol>
+ <ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#请求行"><span class="toc-number">1.</span> <span class="toc-text">请求行</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#请求头"><span class="toc-number">2.</span> <span class="toc-text">请求头</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#请求体"><span class="toc-number">3.</span> <span class="toc-text">请求体</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#HTTP-2"><span class="toc-number">4.</span> <span class="toc-text">HTTP/2</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#未完待续"><span class="toc-number">4.1.</span> <span class="toc-text">未完待续</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#参考"><span class="toc-number">4.2.</span> <span class="toc-text">参考</span></a></li></ol></li></ol>
  
   </div>
 
 <div id="asidepart">
-<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<div class="closeaside"><a class="closebutton" href="#" title="Hide Sidebar"></a></div>
 <aside class="clearfix">
 
   
@@ -384,7 +393,7 @@ CRLF
 
   
 <div class="categorieslist">
-	<p class="asidetitle">分类</p>
+	<p class="asidetitle">Categories</p>
 		<ul>
 		
 		  
@@ -401,7 +410,7 @@ CRLF
 
   
 <div class="tagslist">
-	<p class="asidetitle">标签</p>
+	<p class="asidetitle">Tags</p>
 		<ul class="clearfix">
 		
 			
@@ -419,7 +428,7 @@ CRLF
 
 
   <div class="linkslist">
-  <p class="asidetitle">友情链接</p>
+  <p class="asidetitle">Links</p>
     <ul>
         
           <li>
@@ -435,11 +444,11 @@ CRLF
 
 
   <div class="rsspart">
-	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+	<a href="/atom.xml" target="_blank" title="rss">RSS</a>
 </div>
 
   <div class="weiboshow">
-  <p class="asidetitle">新浪微博</p>
+  <p class="asidetitle">Weibo</p>
     <iframe width="100%" height="119" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=119&fansRow=2&ptype=1&speed=0&skin=9&isTitle=1&noborder=1&isWeibo=0&isFans=0&uid=null&verifier=&dpc=1"></iframe>
 </div>
 
@@ -664,7 +673,7 @@ var _hmt = _hmt || [];
 <!-- Totop Begin -->
 
 	<div id="totop">
-	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	<a title="Back to Top"><img src="/img/scrollup.png"/></a>
 	</div>
 	<script src="/js/totop.js"></script>
 
