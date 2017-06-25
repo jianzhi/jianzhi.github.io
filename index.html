@@ -47,7 +47,7 @@
 				<h1 class="site-name"><a href="/" title="Joey 的吉光片羽">Joey 的吉光片羽</a></h1>
 				<h2 class="blog-motto">睁眼看世界</h2>
 			</div>
-			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="Menu">
 			</a></div>
 			<nav class="animated">
 				<ul>
@@ -63,7 +63,7 @@
  					
 					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
 						<label>Search</label>
-						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="Search" />
 						<input type="hidden" name="q" value="site:jianzhi.github.io">
 					</form>
 					
@@ -88,7 +88,7 @@
 		<a href="/about" title="Joey" target="_blank" itemprop="author">Joey</a>
 		
   <p class="article-time">
-    <time datetime="2017-06-25T10:52:33.000Z" itemprop="datePublished"> 发表于 2017-06-25</time>
+    <time datetime="2017-06-25T10:52:33.000Z" itemprop="datePublished"> Published 2017-06-25</time>
     
   </p>
 </header>
@@ -112,7 +112,7 @@
 </ul>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">//不同级别的 Log 宏定义</div><div class="line">#define DDLogVerbose(frmt, ...) LOG_MAYBE(LOG_ASYNC_ENABLED, LOG_LEVEL_DEF, DDLogFlagVerbose, 0, nil, __PRETTY_FUNCTION__, frmt, ##__VA_ARGS__)</div><div class="line">...</div><div class="line"></div><div class="line">#define LOG_MAYBE(async, lvl, flg, ctx, tag, fnct, frmt, ...) \</div><div class="line">        do &#123; if(lvl &amp; flg) LOG_MACRO(async, lvl, flg, ctx, tag, fnct, frmt, ##__VA_ARGS__); &#125; while(0)</div><div class="line">        </div><div class="line">#define LOG_MACRO(isAsynchronous, lvl, flg, ctx, atag, fnct, frmt, ...) \</div><div class="line">        [DDLog log : isAsynchronous                                     \</div><div class="line">             level : lvl                                                \</div><div class="line">              flag : flg                                                \</div><div class="line">           context : ctx                                                \</div><div class="line">              file : __FILE__                                           \</div><div class="line">          function : fnct                                               \</div><div class="line">              line : __LINE__                                           \</div><div class="line">               tag : atag                                               \</div><div class="line">            format : (frmt), ## __VA_ARGS__]</div></pre></td></tr></table></figure>
 <p>从上面看到 <code>LOG_MAYBE</code>宏定义通过 <code>if(lvl &amp; flg)</code> 判断处理了不同级别的Log信息是否输出的逻辑，然后调用 <code>LOG_MACRO</code> ,最终调用的是<code>DDLog</code>的方法：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line">- (void)log:(BOOL)asynchronous</div><div class="line">    message:(NSString *)message</div><div class="line">      level:(DDLogLevel)level</div><div class="line">       flag:(DDLogFlag)flag</div><div class="line">    context:(NSInteger)context</div><div class="line">       file:(const char *)file</div><div class="line">   function:(const char *)function</div><div class="line">       line:(NSUInteger)line</div><div class="line">        tag:(id)tag &#123;</div><div class="line">    DDLogMessage *logMessage = [[DDLogMessage alloc] initWithMessage:message</div><div class="line">                                                               level:level</div><div class="line">                                                                flag:flag</div><div class="line">                                                             context:context</div><div class="line">                                                                file:[NSString stringWithFormat:@&quot;%s&quot;, file]</div><div class="line">                                                            function:[NSString stringWithFormat:@&quot;%s&quot;, function]</div><div class="line">                                                                line:line</div><div class="line">                                                                 tag:tag</div><div class="line">                                                             options:(DDLogMessageOptions)0</div><div class="line">                                                           timestamp:nil];</div><div class="line">    </div><div class="line">    [self queueLogMessage:logMessage asynchronously:asynchronous];</div><div class="line">&#125;</div><div class="line"></div><div class="line">``` </div><div class="line"> </div><div class="line"> </div><div class="line">* 第二步把 log 数据发给已添加的 Logger，</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line">- (void)log:(BOOL)asynchronous</div><div class="line">    message:(NSString *)message</div><div class="line">      level:(DDLogLevel)level</div><div class="line">       flag:(DDLogFlag)flag</div><div class="line">    context:(NSInteger)context</div><div class="line">       file:(const char *)file</div><div class="line">   function:(const char *)function</div><div class="line">       line:(NSUInteger)line</div><div class="line">        tag:(id)tag &#123;</div><div class="line">    DDLogMessage *logMessage = [[DDLogMessage alloc] initWithMessage:message</div><div class="line">                                                               level:level</div><div class="line">                                                                flag:flag</div><div class="line">                                                             context:context</div><div class="line">                                                                file:[NSString stringWithFormat:@&quot;%s&quot;, file]</div><div class="line">                                                            function:[NSString stringWithFormat:@&quot;%s&quot;, function]</div><div class="line">                                                                line:line</div><div class="line">                                                                 tag:tag</div><div class="line">                                                             options:(DDLogMessageOptions)0</div><div class="line">                                                           timestamp:nil];</div><div class="line">    </div><div class="line">    [self queueLogMessage:logMessage asynchronously:asynchronous];</div><div class="line">&#125;</div><div class="line"></div><div class="line">``` </div><div class="line"> </div><div class="line">* 第二步把 log 数据发给已添加的 Logger，</div></pre></td></tr></table></figure>
 <ul>
 <li><p>(void)queueLogMessage:(DDLogMessage *)logMessage asynchronously:(BOOL)asyncFlag {</p>
 <p>  dispatch_semaphore_wait(_queueSemaphore, DISPATCH_TIME_FOREVER); //信号量减一</p>
@@ -198,10 +198,9 @@ NSData *logData = [message dataUsingEncoding:NSUTF8StringEncoding];
 } @catch (NSException *exception) {
     exception_count++;
     .....
-</code></pre><p>  }<br>}</p>
+</code></pre><p>  }<br>}<br>```</p>
 </li>
 </ul>
-<p>```</p>
 <p>代码比较简单明了， 就是把log信息格式化后写到文件中，写入文件后会检查当前文件大小，文件超过最大限制后就会去回滚归档日志文件。</p>
 <p>最后，总结一下，CocoaLumberjack 日志框架的拓展灵活性相当不错，可自定义日志 level、日志的格式、日志的输出等等，使用起来也简单方便。</p>
 
@@ -247,7 +246,7 @@ NSData *logData = [message dataUsingEncoding:NSUTF8StringEncoding];
 		<a href="/about" title="Joey" target="_blank" itemprop="author">Joey</a>
 		
   <p class="article-time">
-    <time datetime="2017-06-11T13:41:37.000Z" itemprop="datePublished"> 发表于 2017-06-11</time>
+    <time datetime="2017-06-11T13:41:37.000Z" itemprop="datePublished"> Published 2017-06-11</time>
     
   </p>
 </header>
@@ -439,7 +438,7 @@ NSData *logData = [message dataUsingEncoding:NSUTF8StringEncoding];
 		<a href="/about" title="Joey" target="_blank" itemprop="author">Joey</a>
 		
   <p class="article-time">
-    <time datetime="2017-06-04T11:07:33.000Z" itemprop="datePublished"> 发表于 2017-06-04</time>
+    <time datetime="2017-06-04T11:07:33.000Z" itemprop="datePublished"> Published 2017-06-04</time>
     
   </p>
 </header>
@@ -527,7 +526,7 @@ NSData *logData = [message dataUsingEncoding:NSUTF8StringEncoding];
 		<a href="/about" title="Joey" target="_blank" itemprop="author">Joey</a>
 		
   <p class="article-time">
-    <time datetime="2016-08-16T16:11:47.000Z" itemprop="datePublished"> 发表于 2016-08-17</time>
+    <time datetime="2016-08-16T16:11:47.000Z" itemprop="datePublished"> Published 2016-08-17</time>
     
   </p>
 </header>
@@ -815,7 +814,7 @@ NSData *logData = [message dataUsingEncoding:NSUTF8StringEncoding];
 		<a href="/about" title="Joey" target="_blank" itemprop="author">Joey</a>
 		
   <p class="article-time">
-    <time datetime="2016-08-15T15:36:27.000Z" itemprop="datePublished"> 发表于 2016-08-15</time>
+    <time datetime="2016-08-15T15:36:27.000Z" itemprop="datePublished"> Published 2016-08-15</time>
     
   </p>
 </header>
@@ -1046,7 +1045,7 @@ NSData *logData = [message dataUsingEncoding:NSUTF8StringEncoding];
 		<a href="/about" title="Joey" target="_blank" itemprop="author">Joey</a>
 		
   <p class="article-time">
-    <time datetime="2016-08-13T15:55:10.000Z" itemprop="datePublished"> 发表于 2016-08-13</time>
+    <time datetime="2016-08-13T15:55:10.000Z" itemprop="datePublished"> Published 2016-08-13</time>
     
   </p>
 </header>
@@ -1093,10 +1092,10 @@ NSData *logData = [message dataUsingEncoding:NSUTF8StringEncoding];
 
 
 </div>
-      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+      <div class="openaside"><a class="navbutton" href="#" title="Show Sidebar"></a></div>
 
 <div id="asidepart">
-<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<div class="closeaside"><a class="closebutton" href="#" title="Hide Sidebar"></a></div>
 <aside class="clearfix">
 
   
@@ -1104,7 +1103,7 @@ NSData *logData = [message dataUsingEncoding:NSUTF8StringEncoding];
 
   
 <div class="categorieslist">
-	<p class="asidetitle">分类</p>
+	<p class="asidetitle">Categories</p>
 		<ul>
 		
 		  
@@ -1121,7 +1120,7 @@ NSData *logData = [message dataUsingEncoding:NSUTF8StringEncoding];
 
   
 <div class="tagslist">
-	<p class="asidetitle">标签</p>
+	<p class="asidetitle">Tags</p>
 		<ul class="clearfix">
 		
 			
@@ -1137,7 +1136,7 @@ NSData *logData = [message dataUsingEncoding:NSUTF8StringEncoding];
 
 
   <div class="linkslist">
-  <p class="asidetitle">友情链接</p>
+  <p class="asidetitle">Links</p>
     <ul>
         
           <li>
@@ -1153,11 +1152,11 @@ NSData *logData = [message dataUsingEncoding:NSUTF8StringEncoding];
 
 
   <div class="rsspart">
-	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+	<a href="/atom.xml" target="_blank" title="rss">RSS</a>
 </div>
 
   <div class="weiboshow">
-  <p class="asidetitle">新浪微博</p>
+  <p class="asidetitle">Weibo</p>
     <iframe width="100%" height="119" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=119&fansRow=2&ptype=1&speed=0&skin=9&isTitle=1&noborder=1&isWeibo=0&isFans=0&uid=null&verifier=&dpc=1"></iframe>
 </div>
 
@@ -1305,7 +1304,7 @@ var _hmt = _hmt || [];
 <!-- Totop Begin -->
 
 	<div id="totop">
-	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	<a title="Back to Top"><img src="/img/scrollup.png"/></a>
 	</div>
 	<script src="/js/totop.js"></script>
 
