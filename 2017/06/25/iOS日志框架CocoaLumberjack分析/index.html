@@ -1,0 +1,570 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>iOS日志框架CocoaLumberjack分析 | Joey 的吉光片羽</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Joey">
+    
+
+    
+    <meta name="description" content="CocoaLumberjack 是 支持 iOS 和 Mac 平台的日志框架，使用简单，功能强大且不失灵活，它的主要功能就是：支持不同 Level 的 Log 信息输出到各个渠道，包括苹果日志系统、Xcode 控制台、本地文件或者数据库。
+使用方法如下：
+123456789101112131415//1,设置 Log 输出渠道[DDLog addLogger:[DDTTYLogger shared">
+<meta property="og:type" content="article">
+<meta property="og:title" content="iOS日志框架CocoaLumberjack分析">
+<meta property="og:url" content="https://jianzhi.github.io/2017/06/25/iOS日志框架CocoaLumberjack分析/index.html">
+<meta property="og:site_name" content="Joey 的吉光片羽">
+<meta property="og:description" content="CocoaLumberjack 是 支持 iOS 和 Mac 平台的日志框架，使用简单，功能强大且不失灵活，它的主要功能就是：支持不同 Level 的 Log 信息输出到各个渠道，包括苹果日志系统、Xcode 控制台、本地文件或者数据库。
+使用方法如下：
+123456789101112131415//1,设置 Log 输出渠道[DDLog addLogger:[DDTTYLogger shared">
+<meta property="og:updated_time" content="2017-06-25T10:53:18.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="iOS日志框架CocoaLumberjack分析">
+<meta name="twitter:description" content="CocoaLumberjack 是 支持 iOS 和 Mac 平台的日志框架，使用简单，功能强大且不失灵活，它的主要功能就是：支持不同 Level 的 Log 信息输出到各个渠道，包括苹果日志系统、Xcode 控制台、本地文件或者数据库。
+使用方法如下：
+123456789101112131415//1,设置 Log 输出渠道[DDLog addLogger:[DDTTYLogger shared">
+
+    
+    <link rel="alternative" href="/atom.xml" title="Joey 的吉光片羽" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/logo.png" alt="Joey 的吉光片羽" title="Joey 的吉光片羽"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="Joey 的吉光片羽">Joey 的吉光片羽</a></h1>
+				<h2 class="blog-motto">睁眼看世界</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="Menu">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">Home</a></li>
+					
+						<li><a href="/archives">Archives</a></li>
+					
+						<li><a href="/about">About</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="Search" />
+						<input type="hidden" name="q" value="site:jianzhi.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2017/06/25/iOS日志框架CocoaLumberjack分析/" title="iOS日志框架CocoaLumberjack分析" itemprop="url">iOS日志框架CocoaLumberjack分析</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Joey" target="_blank" itemprop="author">Joey</a>
+		
+  <p class="article-time">
+    <time datetime="2017-06-25T10:52:33.000Z" itemprop="datePublished"> Published 2017-06-25</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">Contents</strong>
+		
+			
+		
+		</div>
+		
+		<p><a href="https://github.com/CocoaLumberjack/CocoaLumberjack">CocoaLumberjack</a> 是 支持 iOS 和 Mac 平台的日志框架，使用简单，功能强大且不失灵活，它的主要功能就是：支持不同 Level 的 Log 信息输出到各个渠道，包括苹果日志系统、Xcode 控制台、本地文件或者数据库。</p>
+<p>使用方法如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">//1,设置 Log 输出渠道</div><div class="line">[DDLog addLogger:[DDTTYLogger sharedInstance]]; // TTY = Xcode console</div><div class="line">[DDLog addLogger:[DDASLLogger sharedInstance]]; // ASL = Apple System Logs</div><div class="line"></div><div class="line">DDFileLogger *fileLogger = [[DDFileLogger alloc] init]; // File Logger</div><div class="line">fileLogger.rollingFrequency = 60 * 60 * 24; // 24 hour rolling</div><div class="line">fileLogger.logFileManager.maximumNumberOfLogFiles = 7;</div><div class="line">[DDLog addLogger:fileLogger];</div><div class="line"></div><div class="line">//2,打印 log 信息</div><div class="line">DDLogVerbose(@&quot;Verbose&quot;); // Log 信息</div><div class="line">DDLogDebug(@&quot;Debug&quot;);</div><div class="line">DDLogInfo(@&quot;Info&quot;);</div><div class="line">DDLogWarn(@&quot;Warn&quot;);</div><div class="line">DDLogError(@&quot;Error&quot;);</div></pre></td></tr></table></figure>
+<ul>
+<li>首先，通过 DDLog 的 <code>addLogger:(id &lt;DDLogger&gt;)logger</code> 方法添加 Log 数据输出的渠道，上面代码是添加了 <code>DDTTYLogger</code> （Xcode 控制台）、<code>DDASLLogger</code> （苹果日志系统）、<code>DDFileLogger</code>（本地文件）三种渠道；</li>
+<li>然后，使用区分不同 Level 的宏定义方法，即可把 Log 信息输出到前面添加的渠道。</li>
+</ul>
+<p>下面，逐步分析下其实现：</p>
+<ol>
+<li>所有的 log 数据都会发给 DDLog 对象；</li>
+<li>DDLog 对象再把 log 数据派发给已添加的各个 Logger 对象；</li>
+<li>DDLogger 对象将 log 数据通过其配置的 <code>DDLogFomatter</code> 格式类进行格式处理后输出；</li>
+</ol>
+<ul>
+<li>第一步，以调用<code>DDLogVerbose</code> log 信息为例，<code>DDLogVerbose</code> 宏定义实则为了方便调用 log 信息：</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">//不同级别的 Log 宏定义</div><div class="line">#define DDLogVerbose(frmt, ...) LOG_MAYBE(LOG_ASYNC_ENABLED, LOG_LEVEL_DEF, DDLogFlagVerbose, 0, nil, __PRETTY_FUNCTION__, frmt, ##__VA_ARGS__)</div><div class="line">...</div><div class="line"></div><div class="line">#define LOG_MAYBE(async, lvl, flg, ctx, tag, fnct, frmt, ...) \</div><div class="line">        do &#123; if(lvl &amp; flg) LOG_MACRO(async, lvl, flg, ctx, tag, fnct, frmt, ##__VA_ARGS__); &#125; while(0)</div><div class="line">        </div><div class="line">#define LOG_MACRO(isAsynchronous, lvl, flg, ctx, atag, fnct, frmt, ...) \</div><div class="line">        [DDLog log : isAsynchronous                                     \</div><div class="line">             level : lvl                                                \</div><div class="line">              flag : flg                                                \</div><div class="line">           context : ctx                                                \</div><div class="line">              file : __FILE__                                           \</div><div class="line">          function : fnct                                               \</div><div class="line">              line : __LINE__                                           \</div><div class="line">               tag : atag                                               \</div><div class="line">            format : (frmt), ## __VA_ARGS__]</div></pre></td></tr></table></figure>
+<p>从上面看到 <code>LOG_MAYBE</code>宏定义通过 <code>if(lvl &amp; flg)</code> 判断处理了不同级别的Log信息是否输出的逻辑，然后调用 <code>LOG_MACRO</code> ,最终调用的是<code>DDLog</code>的方法：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line">- (void)log:(BOOL)asynchronous</div><div class="line">    message:(NSString *)message</div><div class="line">      level:(DDLogLevel)level</div><div class="line">       flag:(DDLogFlag)flag</div><div class="line">    context:(NSInteger)context</div><div class="line">       file:(const char *)file</div><div class="line">   function:(const char *)function</div><div class="line">       line:(NSUInteger)line</div><div class="line">        tag:(id)tag &#123;</div><div class="line">    DDLogMessage *logMessage = [[DDLogMessage alloc] initWithMessage:message</div><div class="line">                                                               level:level</div><div class="line">                                                                flag:flag</div><div class="line">                                                             context:context</div><div class="line">                                                                file:[NSString stringWithFormat:@&quot;%s&quot;, file]</div><div class="line">                                                            function:[NSString stringWithFormat:@&quot;%s&quot;, function]</div><div class="line">                                                                line:line</div><div class="line">                                                                 tag:tag</div><div class="line">                                                             options:(DDLogMessageOptions)0</div><div class="line">                                                           timestamp:nil];</div><div class="line">    </div><div class="line">    [self queueLogMessage:logMessage asynchronously:asynchronous];</div><div class="line">&#125;</div><div class="line"></div><div class="line">``` </div><div class="line"> </div><div class="line"> </div><div class="line">* 第二步把 log 数据发给已添加的 Logger，</div></pre></td></tr></table></figure>
+<ul>
+<li><p>(void)queueLogMessage:(DDLogMessage *)logMessage asynchronously:(BOOL)asyncFlag {</p>
+<p>  dispatch_semaphore_wait(_queueSemaphore, DISPATCH_TIME_FOREVER); //信号量减一</p>
+<p>  ……</p>
+<p>  dispatch_block_t logBlock = ^{</p>
+<pre><code>@autoreleasepool {
+    [self lt_log:logMessage];
+}
+</code></pre><p>  };</p>
+<p>  if (asyncFlag) {</p>
+<pre><code>dispatch_async(_loggingQueue, logBlock);
+</code></pre><p>  } else {</p>
+<pre><code>dispatch_sync(_loggingQueue, logBlock);
+</code></pre><p>  }<br>}</p>
+</li>
+<li><p>(void)lt_log:(DDLogMessage *)logMessage {<br>  // Execute the given log message on each of our loggers.</p>
+<p>  NSAssert(dispatch_get_specific(GlobalLoggingQueueIdentityKey),</p>
+<pre><code>@&quot;This method should only be run on the logging thread/queue&quot;);
+</code></pre><p>  if (_numProcessors &gt; 1) {</p>
+<pre><code>for (DDLoggerNode *loggerNode in self._loggers) {
+    // skip the loggers that shouldn&apos;t write this message based on the log level
+
+    if (!(logMessage-&gt;_flag &amp; loggerNode-&gt;_level)) {
+        continue;
+    }
+
+    dispatch_group_async(_loggingGroup, loggerNode-&gt;_loggerQueue, ^{ @autoreleasepool {
+        [loggerNode-&gt;_logger logMessage:logMessage];
+    } });
+}
+
+dispatch_group_wait(_loggingGroup, DISPATCH_TIME_FOREVER);
+</code></pre><p>  } else {</p>
+<pre><code>// Execute each logger serialy, each within its own queue.
+//针对于单核处理器做的优化处理
+....
+</code></pre><p>  }</p>
+<p>  dispatch_semaphore_signal(_queueSemaphore);//信号量加一<br>}</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">从上面代码看到，所有的 log 消息都会添加到 loggingQueue 串行队列中，确保先进先出，而且使用了信号量来限制添加到队列中的log数量：</div><div class="line"></div><div class="line">- `dispatch_semaphore_wait` 与 `dispatch_semaphore_signal` 的使用比较简单，`dispatch_semaphore_wait` 信号量减一，`dispatch_semaphore_signal`信号量加一， 当信号量为0时线程就会进入等待状态，直到信号量大于0时才会执行下去；创建信号量的时候可指定信号量个数：</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<ul>
+<li><p>(void)initialize {<br>  static dispatch_once_t DDLogOnceToken;</p>
+<p>  dispatch_once(&amp;DDLogOnceToken, ^{</p>
+<pre><code>NSLogDebug(@&quot;DDLog: Using grand central dispatch&quot;);
+
+_loggingQueue = dispatch_queue_create(&quot;cocoa.lumberjack&quot;, NULL);//串行队列
+_loggingGroup = dispatch_group_create();
+
+void *nonNullValue = GlobalLoggingQueueIdentityKey; // Whatever, just not null
+dispatch_queue_set_specific(_loggingQueue, GlobalLoggingQueueIdentityKey, nonNullValue, NULL); //添加标志
+
+_queueSemaphore = dispatch_semaphore_create(DDLOG_MAX_QUEUE_SIZE);//通过信号量设置队列最大数量
+
+......
+_numProcessors = MAX([NSProcessInfo processInfo].processorCount, (NSUInteger) 1);
+
+NSLogDebug(@&quot;DDLog: numProcessors = %@&quot;, @(_numProcessors));
+</code></pre><p>  });<br>}</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">- `dispatch_get_specific` 与 `dispatch_queue_set_specific` 方法，作用类似于`objc_setAssociatedObject` 跟 `objc_getAssociatedObject`，在线程队列中添加标志，运行的时候取出标志便可判断某个方法是否运行在指定的队列中。从上面代码可看出，在 loggingQueue 队列创建的时候就设置了标识 `GlobalLoggingQueueIdentityKey`, 到时候取出当前线程的标志进行判断，来确保 `lt_log:(DDLogMessage *)logMessage` 方法在 `loggingQueue` 队列中。</div><div class="line">- 使用 `dispatch_group_wait` 方法，使得多个并发 block 全部执行完成后程序才会执行下去。这里，NSLog 对象会将 log 信息派发给多个渠道 （NSLogger）并发执行记录 log 信息，执行完之后便会将信号量加一。</div><div class="line"></div><div class="line"></div><div class="line">- 第三步，不同的 NSLogger 会在自己的线程队列中记录 log 信息，下面来看 `DDFileLogger` 的处理：</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<ul>
+<li><p>(void)logMessage:(DDLogMessage <em>)logMessage {<br>  NSString </em>message = logMessage-&gt;_message;<br>  BOOL isFormatted = NO;</p>
+<p>  if (_logFormatter) {//格式化log数据</p>
+<pre><code>message = [_logFormatter formatLogMessage:logMessage];
+isFormatted = message != logMessage-&gt;_message;
+</code></pre><p>  }</p>
+<p>  if (message) {</p>
+<pre><code>if ((!isFormatted || _automaticallyAppendNewlineForCustomFormatters) &amp;&amp;
+    (![message hasSuffix:@&quot;\n&quot;])) {//添加换行符
+    message = [message stringByAppendingString:@&quot;\n&quot;];
+}
+
+NSData *logData = [message dataUsingEncoding:NSUTF8StringEncoding];
+
+@try {
+    [self willLogMessage];
+
+    [[self currentLogFileHandle] writeData:logData]; //写入文件中
+
+    [self didLogMessage]; 
+} @catch (NSException *exception) {
+    exception_count++;
+    .....
+</code></pre><p>  }<br>}</p>
+</li>
+</ul>
+<p>```<br>代码比较简单明了， 就是把log信息格式化后写到文件中，写入文件后会检查当前文件大小，文件超过最大限制后就会去回滚归档日志文件。</p>
+<p>最后，总结一下，CocoaLumberjack 日志框架的拓展灵活性相当不错，可自定义日志 level、日志的格式、日志的输出等等，使用起来也简单方便。</p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="https://jianzhi.github.io/2017/06/25/iOS日志框架CocoaLumberjack分析/" data-title="iOS日志框架CocoaLumberjack分析 | Joey 的吉光片羽" data-tsina="null" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+
+<div class="next">
+<a href="/2017/06/11/总结-HTTP-协议在-iOS-中的使用/"  title="总结 HTTP 协议在 iOS 中的使用">
+ <strong>下一篇：</strong><br/> 
+ <span>总结 HTTP 协议在 iOS 中的使用
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="Show Sidebar"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">Contents</strong>
+ 
+ 
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="Hide Sidebar"></a></div>
+<aside class="clearfix">
+
+  
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">Categories</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/iOS编程/" title="iOS编程">iOS编程<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/生活/" title="生活">生活<sup>2</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">Tags</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/iOS/" title="iOS">iOS<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/HTTP-iOS/" title="HTTP , iOS">HTTP , iOS<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">Links</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="http://jacman.wuchong.me/2014/11/20/how-to-use-jacman/" target="_blank" title="如何使用 Jacman 主题">如何使用 Jacman 主题</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS</a>
+</div>
+
+  <div class="weiboshow">
+  <p class="asidetitle">Weibo</p>
+    <iframe width="100%" height="119" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=119&fansRow=2&ptype=1&speed=0&skin=9&isTitle=1&noborder=1&isWeibo=0&isFans=0&uid=null&verifier=&dpc=1"></iframe>
+</div>
+
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> Hello ,I&#39;m Joey. <br/>
+			</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2017 
+		
+		<a href="/about" target="_blank" title="Joey">Joey</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?e6d1f421bbc9962127a50488f9ed37d1";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="Back to Top"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>
