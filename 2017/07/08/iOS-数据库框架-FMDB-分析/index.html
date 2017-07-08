@@ -11,28 +11,28 @@
     
 
     
-    <meta name="description" content="iOS 数据库 FMDB 框架分析FMDB 框架用 Objective-C 语法封装了 SQLite 的 C 语言 API，使得操作数据库更加方便，面向对象。在此结合使用来分析 FMDB 的封装实现：
+    <meta name="description" content="FMDB 框架用 Objective-C 语法封装了 SQLite 的 C 语言 API，使得操作数据库更加方便，面向对象。在此结合使用来分析 FMDB 的封装实现：
 主要的几个类：
 FMDatabase:代表一个 SQLite 数据库实例，用于执行 SQL 语句。
 FMResultSet:代表在FMDatabase中执行查询后的结果集。
-FMDatabaseQu">
+FMDatabaseQueue:用于多线程读写数据库。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="iOS 数据库框架 FMDB 分析">
 <meta property="og:url" content="https://jianzhi.github.io/2017/07/08/iOS-数据库框架-FMDB-分析/index.html">
 <meta property="og:site_name" content="Joey 的吉光片羽">
-<meta property="og:description" content="iOS 数据库 FMDB 框架分析FMDB 框架用 Objective-C 语法封装了 SQLite 的 C 语言 API，使得操作数据库更加方便，面向对象。在此结合使用来分析 FMDB 的封装实现：
+<meta property="og:description" content="FMDB 框架用 Objective-C 语法封装了 SQLite 的 C 语言 API，使得操作数据库更加方便，面向对象。在此结合使用来分析 FMDB 的封装实现：
 主要的几个类：
 FMDatabase:代表一个 SQLite 数据库实例，用于执行 SQL 语句。
 FMResultSet:代表在FMDatabase中执行查询后的结果集。
-FMDatabaseQu">
-<meta property="og:updated_time" content="2017-07-08T14:35:22.000Z">
+FMDatabaseQueue:用于多线程读写数据库。">
+<meta property="og:updated_time" content="2017-07-08T14:36:53.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="iOS 数据库框架 FMDB 分析">
-<meta name="twitter:description" content="iOS 数据库 FMDB 框架分析FMDB 框架用 Objective-C 语法封装了 SQLite 的 C 语言 API，使得操作数据库更加方便，面向对象。在此结合使用来分析 FMDB 的封装实现：
+<meta name="twitter:description" content="FMDB 框架用 Objective-C 语法封装了 SQLite 的 C 语言 API，使得操作数据库更加方便，面向对象。在此结合使用来分析 FMDB 的封装实现：
 主要的几个类：
 FMDatabase:代表一个 SQLite 数据库实例，用于执行 SQL 语句。
 FMResultSet:代表在FMDatabase中执行查询后的结果集。
-FMDatabaseQu">
+FMDatabaseQueue:用于多线程读写数据库。">
 
     
     <link rel="alternative" href="/atom.xml" title="Joey 的吉光片羽" type="application/atom+xml">
@@ -108,11 +108,11 @@ FMDatabaseQu">
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">Contents</strong>
 		
-			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#iOS-数据库-FMDB-框架分析"><span class="toc-number">1.</span> <span class="toc-text">iOS 数据库 FMDB 框架分析</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#主要的几个类："><span class="toc-number">1.0.0.1.</span> <span class="toc-text">主要的几个类：</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#创建数据库"><span class="toc-number">1.0.0.2.</span> <span class="toc-text">创建数据库</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#打开数据库"><span class="toc-number">1.0.0.3.</span> <span class="toc-text">打开数据库</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#执行更新操作"><span class="toc-number">1.0.0.4.</span> <span class="toc-text">执行更新操作</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#查询操作"><span class="toc-number">1.0.0.5.</span> <span class="toc-text">查询操作</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#事务操作"><span class="toc-number">1.0.0.6.</span> <span class="toc-text">事务操作</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#线程安全"><span class="toc-number">1.0.0.7.</span> <span class="toc-text">线程安全</span></a></li></ol></li></ol></li></ol></li></ol>
+			<ol class="toc"><li class="toc-item toc-level-5"><a class="toc-link" href="#主要的几个类："><span class="toc-number">1.</span> <span class="toc-text">主要的几个类：</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#创建数据库"><span class="toc-number">2.</span> <span class="toc-text">创建数据库</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#打开数据库"><span class="toc-number">3.</span> <span class="toc-text">打开数据库</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#执行更新操作"><span class="toc-number">4.</span> <span class="toc-text">执行更新操作</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#查询操作"><span class="toc-number">5.</span> <span class="toc-text">查询操作</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#事务操作"><span class="toc-number">6.</span> <span class="toc-text">事务操作</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#线程安全"><span class="toc-number">7.</span> <span class="toc-text">线程安全</span></a></li></ol>
 		
 		</div>
 		
-		<h2 id="iOS-数据库-FMDB-框架分析"><a href="#iOS-数据库-FMDB-框架分析" class="headerlink" title="iOS 数据库 FMDB 框架分析"></a>iOS 数据库 FMDB 框架分析</h2><p><a href="https://github.com/ccgus/fmdb">FMDB</a> 框架用 Objective-C 语法封装了 SQLite 的 C 语言 API，使得操作数据库更加方便，面向对象。在此结合使用来分析 FMDB 的封装实现：</p>
+		<p><a href="https://github.com/ccgus/fmdb">FMDB</a> 框架用 Objective-C 语法封装了 SQLite 的 C 语言 API，使得操作数据库更加方便，面向对象。在此结合使用来分析 FMDB 的封装实现：</p>
 <h5 id="主要的几个类："><a href="#主要的几个类：" class="headerlink" title="主要的几个类："></a>主要的几个类：</h5><ul>
 <li><code>FMDatabase</code>:代表一个 SQLite 数据库实例，用于执行 SQL 语句。</li>
 <li><code>FMResultSet</code>:代表在<code>FMDatabase</code>中执行查询后的结果集。</li>
@@ -200,7 +200,7 @@ FMDatabaseQu">
   <div id="toc" class="toc-aside">
   <strong class="toc-title">Contents</strong>
  
- <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#iOS-数据库-FMDB-框架分析"><span class="toc-number">1.</span> <span class="toc-text">iOS 数据库 FMDB 框架分析</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#主要的几个类："><span class="toc-number">1.0.0.1.</span> <span class="toc-text">主要的几个类：</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#创建数据库"><span class="toc-number">1.0.0.2.</span> <span class="toc-text">创建数据库</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#打开数据库"><span class="toc-number">1.0.0.3.</span> <span class="toc-text">打开数据库</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#执行更新操作"><span class="toc-number">1.0.0.4.</span> <span class="toc-text">执行更新操作</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#查询操作"><span class="toc-number">1.0.0.5.</span> <span class="toc-text">查询操作</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#事务操作"><span class="toc-number">1.0.0.6.</span> <span class="toc-text">事务操作</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#线程安全"><span class="toc-number">1.0.0.7.</span> <span class="toc-text">线程安全</span></a></li></ol></li></ol></li></ol></li></ol>
+ <ol class="toc"><li class="toc-item toc-level-5"><a class="toc-link" href="#主要的几个类："><span class="toc-number">1.</span> <span class="toc-text">主要的几个类：</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#创建数据库"><span class="toc-number">2.</span> <span class="toc-text">创建数据库</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#打开数据库"><span class="toc-number">3.</span> <span class="toc-text">打开数据库</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#执行更新操作"><span class="toc-number">4.</span> <span class="toc-text">执行更新操作</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#查询操作"><span class="toc-number">5.</span> <span class="toc-text">查询操作</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#事务操作"><span class="toc-number">6.</span> <span class="toc-text">事务操作</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#线程安全"><span class="toc-number">7.</span> <span class="toc-text">线程安全</span></a></li></ol>
  
   </div>
 
