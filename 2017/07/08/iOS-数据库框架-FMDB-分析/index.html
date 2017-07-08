@@ -1,0 +1,511 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>iOS 数据库框架 FMDB 分析 | Joey 的吉光片羽</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Joey">
+    
+
+    
+    <meta name="description" content="iOS 数据库 FMDB 框架分析FMDB 框架用 Objective-C 语法封装了 SQLite 的 C 语言 API，使得操作数据库更加方便，面向对象。在此结合使用来分析 FMDB 的封装实现：
+主要的几个类：
+FMDatabase:代表一个 SQLite 数据库实例，用于执行 SQL 语句。
+FMResultSet:代表在FMDatabase中执行查询后的结果集。
+FMDatabaseQu">
+<meta property="og:type" content="article">
+<meta property="og:title" content="iOS 数据库框架 FMDB 分析">
+<meta property="og:url" content="https://jianzhi.github.io/2017/07/08/iOS-数据库框架-FMDB-分析/index.html">
+<meta property="og:site_name" content="Joey 的吉光片羽">
+<meta property="og:description" content="iOS 数据库 FMDB 框架分析FMDB 框架用 Objective-C 语法封装了 SQLite 的 C 语言 API，使得操作数据库更加方便，面向对象。在此结合使用来分析 FMDB 的封装实现：
+主要的几个类：
+FMDatabase:代表一个 SQLite 数据库实例，用于执行 SQL 语句。
+FMResultSet:代表在FMDatabase中执行查询后的结果集。
+FMDatabaseQu">
+<meta property="og:updated_time" content="2017-07-08T14:35:22.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="iOS 数据库框架 FMDB 分析">
+<meta name="twitter:description" content="iOS 数据库 FMDB 框架分析FMDB 框架用 Objective-C 语法封装了 SQLite 的 C 语言 API，使得操作数据库更加方便，面向对象。在此结合使用来分析 FMDB 的封装实现：
+主要的几个类：
+FMDatabase:代表一个 SQLite 数据库实例，用于执行 SQL 语句。
+FMResultSet:代表在FMDatabase中执行查询后的结果集。
+FMDatabaseQu">
+
+    
+    <link rel="alternative" href="/atom.xml" title="Joey 的吉光片羽" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/logo.png" alt="Joey 的吉光片羽" title="Joey 的吉光片羽"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="Joey 的吉光片羽">Joey 的吉光片羽</a></h1>
+				<h2 class="blog-motto">睁眼看世界</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="Menu">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">Home</a></li>
+					
+						<li><a href="/archives">Archives</a></li>
+					
+						<li><a href="/about">About</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="Search" />
+						<input type="hidden" name="q" value="site:jianzhi.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2017/07/08/iOS-数据库框架-FMDB-分析/" title="iOS 数据库框架 FMDB 分析" itemprop="url">iOS 数据库框架 FMDB 分析</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Joey" target="_blank" itemprop="author">Joey</a>
+		
+  <p class="article-time">
+    <time datetime="2017-07-08T14:34:27.000Z" itemprop="datePublished"> Published 2017-07-08</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">Contents</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#iOS-数据库-FMDB-框架分析"><span class="toc-number">1.</span> <span class="toc-text">iOS 数据库 FMDB 框架分析</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#主要的几个类："><span class="toc-number">1.0.0.1.</span> <span class="toc-text">主要的几个类：</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#创建数据库"><span class="toc-number">1.0.0.2.</span> <span class="toc-text">创建数据库</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#打开数据库"><span class="toc-number">1.0.0.3.</span> <span class="toc-text">打开数据库</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#执行更新操作"><span class="toc-number">1.0.0.4.</span> <span class="toc-text">执行更新操作</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#查询操作"><span class="toc-number">1.0.0.5.</span> <span class="toc-text">查询操作</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#事务操作"><span class="toc-number">1.0.0.6.</span> <span class="toc-text">事务操作</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#线程安全"><span class="toc-number">1.0.0.7.</span> <span class="toc-text">线程安全</span></a></li></ol></li></ol></li></ol></li></ol>
+		
+		</div>
+		
+		<h2 id="iOS-数据库-FMDB-框架分析"><a href="#iOS-数据库-FMDB-框架分析" class="headerlink" title="iOS 数据库 FMDB 框架分析"></a>iOS 数据库 FMDB 框架分析</h2><p><a href="https://github.com/ccgus/fmdb">FMDB</a> 框架用 Objective-C 语法封装了 SQLite 的 C 语言 API，使得操作数据库更加方便，面向对象。在此结合使用来分析 FMDB 的封装实现：</p>
+<h5 id="主要的几个类："><a href="#主要的几个类：" class="headerlink" title="主要的几个类："></a>主要的几个类：</h5><ul>
+<li><code>FMDatabase</code>:代表一个 SQLite 数据库实例，用于执行 SQL 语句。</li>
+<li><code>FMResultSet</code>:代表在<code>FMDatabase</code>中执行查询后的结果集。</li>
+<li><code>FMDatabaseQueue</code>:用于多线程读写数据库。</li>
+</ul>
+<h5 id="创建数据库"><a href="#创建数据库" class="headerlink" title="创建数据库"></a>创建数据库</h5><p>主要通过<code>FMDatabase</code>的<code>databaseWithPath</code>方法，但此时并没有真正创建数据库：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line">+ (instancetype)databaseWithPath:(NSString*)aPath &#123;</div><div class="line">    return FMDBReturnAutoreleased([[self alloc] initWithPath:aPath]);</div><div class="line">&#125;</div><div class="line"></div><div class="line">- (instancetype)initWithPath:(NSString*)aPath &#123;</div><div class="line">    </div><div class="line">    assert(sqlite3_threadsafe()); // whoa there big boy- gotta make sure sqlite it happy with what we&apos;re going to do.</div><div class="line">    </div><div class="line">    self = [super init];</div><div class="line">    </div><div class="line">    if (self) &#123;</div><div class="line">        _databasePath               = [aPath copy];</div><div class="line">        _openResultSets             = [[NSMutableSet alloc] init];</div><div class="line">        _db                         = nil;</div><div class="line">        _logsErrors                 = YES;</div><div class="line">        _crashOnErrors              = NO;</div><div class="line">        _maxBusyRetryTimeInterval   = 2;</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    return self;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>这里用到了<code>sqlite3_threadsafe()</code>方法，用于判断编译阶段<code>SQLite</code>是否线程安全；<br><code>SQLite</code>有三种线程模式：</p>
+<ul>
+<li>单线程(Single-thread)：所有互斥锁(mutex)都被禁用，多个线程同时访问 SQLite 是不安全的。</li>
+<li>多线程(Multi-thread)：一个数据库连接同一时间内只有一个线程使用就是安全的，多个线程同时使用同一个连接就是不安全的。</li>
+<li>串行(Serialized)：    开启所有锁，可以被多个线程任意访问。</li>
+</ul>
+<p>在 iOS 中编译<code>SQlite</code>时默认使用的是多线程模式，sqlite3_threadsafe() 方法返回的是 2。如果返回 0 则代表是单线程模式，返回 1 代表是串行模式。</p>
+<p>要想设置SQlite的线程模式，有很多种方式：</p>
+<ul>
+<li>编译期设定： 通过 SQLITE_THREADSAFE 这个参数进行编译器的设置来选择线程模型</li>
+<li>初始化设定： 通过调用 sqlite3_config() 可以在 SQLite 初始化时设置，例如想要设置串行模式：<code>sqlite3_config(SQLITE_CONFIG_SINGLETHREAD);</code></li>
+<li>运行时设定： 通过调用 sqlite3_open_v2() 方法指定数据库连接的数据库线程模式</li>
+</ul>
+<h5 id="打开数据库"><a href="#打开数据库" class="headerlink" title="打开数据库"></a>打开数据库</h5><p>在操作数据库之前，必须先打开数据库，使用<code>FMDatabase</code>的<code>open</code>方法：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div></pre></td><td class="code"><pre><div class="line">- (BOOL)open &#123;</div><div class="line">    if (_db) &#123;</div><div class="line">        return YES;</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    int err = sqlite3_open([self sqlitePath], (sqlite3**)&amp;_db );</div><div class="line">    if(err != SQLITE_OK) &#123;</div><div class="line">        NSLog(@&quot;error opening!: %d&quot;, err);</div><div class="line">        return NO;</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    if (_maxBusyRetryTimeInterval &gt; 0.0) &#123;</div><div class="line">        // set the handler</div><div class="line">        [self setMaxBusyRetryTimeInterval:_maxBusyRetryTimeInterval];</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    return YES;</div><div class="line">&#125;</div><div class="line"></div><div class="line">- (void)setMaxBusyRetryTimeInterval:(NSTimeInterval)timeout &#123;</div><div class="line">    </div><div class="line">    _maxBusyRetryTimeInterval = timeout;</div><div class="line">    </div><div class="line">    if (!_db) &#123;</div><div class="line">        return;</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    if (timeout &gt; 0) &#123;//设置重试的回调</div><div class="line">        sqlite3_busy_handler(_db, &amp;FMDBDatabaseBusyHandler, (__bridge void *)(self));</div><div class="line">    &#125;</div><div class="line">    else &#123;</div><div class="line">        // turn it off otherwise</div><div class="line">        sqlite3_busy_handler(_db, nil, nil);</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">static int FMDBDatabaseBusyHandler(void *f, int count) &#123;</div><div class="line">    FMDatabase *self = (__bridge FMDatabase*)f;</div><div class="line">    </div><div class="line">    if (count == 0) &#123;//回调次数为0，也就是说这是第一次回调</div><div class="line">        self-&gt;_startBusyRetryTime = [NSDate timeIntervalSinceReferenceDate];</div><div class="line">        return 1; //返回1表示继续重试</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    NSTimeInterval delta = [NSDate timeIntervalSinceReferenceDate] - (self-&gt;_startBusyRetryTime);</div><div class="line">    </div><div class="line">    if (delta &lt; [self maxBusyRetryTimeInterval]) &#123;//小于最大重试时间，继续重试</div><div class="line">        int requestedSleepInMillseconds = (int) arc4random_uniform(50) + 50;</div><div class="line">        int actualSleepInMilliseconds = sqlite3_sleep(requestedSleepInMillseconds);</div><div class="line">        if (actualSleepInMilliseconds != requestedSleepInMillseconds) &#123;</div><div class="line">            NSLog(@&quot;WARNING: Requested sleep of %i milliseconds, but SQLite returned %i. Maybe SQLite wasn&apos;t built with HAVE_USLEEP=1?&quot;, requestedSleepInMillseconds, actualSleepInMilliseconds);</div><div class="line">        &#125;</div><div class="line">        return 1;</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    return 0;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>这里，使用 sqlite3_busy_handler 注册了一个回调处理 SQLITE_BUSY 的错误情况，也就是当其他线程或进程正在读写数据库锁住了数据表的时候，就会回调 FMDBDatabaseBusyHandler 方法，FMDBDatabaseBusyHandler 里面设置了最大重试时间，超时后就不再重试。<br>iOS APP 都是单进程的，那么就只有多线程多句柄的情况下读写数据库，才会出现这种 sqlite_busy 的情况了。</p>
+<h5 id="执行更新操作"><a href="#执行更新操作" class="headerlink" title="执行更新操作"></a>执行更新操作</h5><p>这里更新操作包括了增删改等，方法实现如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div><div class="line">121</div><div class="line">122</div><div class="line">123</div><div class="line">124</div><div class="line">125</div><div class="line">126</div><div class="line">127</div><div class="line">128</div><div class="line">129</div><div class="line">130</div><div class="line">131</div><div class="line">132</div><div class="line">133</div><div class="line">134</div><div class="line">135</div><div class="line">136</div><div class="line">137</div><div class="line">138</div><div class="line">139</div><div class="line">140</div><div class="line">141</div><div class="line">142</div><div class="line">143</div><div class="line">144</div><div class="line">145</div><div class="line">146</div><div class="line">147</div><div class="line">148</div><div class="line">149</div><div class="line">150</div><div class="line">151</div><div class="line">152</div><div class="line">153</div><div class="line">154</div><div class="line">155</div><div class="line">156</div><div class="line">157</div><div class="line">158</div><div class="line">159</div><div class="line">160</div><div class="line">161</div></pre></td><td class="code"><pre><div class="line">- (BOOL)executeUpdate:(NSString*)sql error:(NSError**)outErr withArgumentsInArray:(NSArray*)arrayArgs orDictionary:(NSDictionary *)dictionaryArgs orVAList:(va_list)args &#123;</div><div class="line">    ......</div><div class="line">    if (_isExecutingStatement) &#123;</div><div class="line">        [self warnInUse];</div><div class="line">        return NO;</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    _isExecutingStatement = YES;</div><div class="line">    </div><div class="line">    int rc                   = 0x00;</div><div class="line">    sqlite3_stmt *pStmt      = 0x00;</div><div class="line">    FMStatement *cachedStmt  = 0x00;</div><div class="line">    </div><div class="line">    ......</div><div class="line">    </div><div class="line">    if (_shouldCacheStatements) &#123;//使用缓存中编译后的SQL语句</div><div class="line">        cachedStmt = [self cachedStatementForQuery:sql];</div><div class="line">        pStmt = cachedStmt ? [cachedStmt statement] : 0x00;</div><div class="line">        [cachedStmt reset];</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    if (!pStmt) &#123;</div><div class="line">        rc = sqlite3_prepare_v2(_db, [sql UTF8String], -1, &amp;pStmt, 0); //预处理SQL语句</div><div class="line">        </div><div class="line">        if (SQLITE_OK != rc) &#123;</div><div class="line">            ......</div><div class="line">            </div><div class="line">            sqlite3_finalize(pStmt);</div><div class="line">            </div><div class="line">            _isExecutingStatement = NO;</div><div class="line">            return NO;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    id obj;</div><div class="line">    int idx = 0;</div><div class="line">    int queryCount = sqlite3_bind_parameter_count(pStmt);</div><div class="line">    </div><div class="line">    if (dictionaryArgs) &#123;</div><div class="line">        </div><div class="line">        for (NSString *dictionaryKey in [dictionaryArgs allKeys]) &#123;</div><div class="line">            </div><div class="line">            // Prefix the key with a colon.</div><div class="line">            NSString *parameterName = [[NSString alloc] initWithFormat:@&quot;:%@&quot;, dictionaryKey];</div><div class="line">            </div><div class="line">            if (_traceExecution) &#123;</div><div class="line">                NSLog(@&quot;%@ = %@&quot;, parameterName, [dictionaryArgs objectForKey:dictionaryKey]);</div><div class="line">            &#125;</div><div class="line">            // Get the index for the parameter name.</div><div class="line">            int namedIdx = sqlite3_bind_parameter_index(pStmt, [parameterName UTF8String]);</div><div class="line">            </div><div class="line">            FMDBRelease(parameterName);</div><div class="line">            </div><div class="line">            if (namedIdx &gt; 0) &#123;</div><div class="line">                // Standard binding from here.</div><div class="line">                [self bindObject:[dictionaryArgs objectForKey:dictionaryKey] toColumn:namedIdx inStatement:pStmt];</div><div class="line">                </div><div class="line">                // increment the binding count, so our check below works out</div><div class="line">                idx++;</div><div class="line">            &#125;</div><div class="line">            else &#123;</div><div class="line">                NSString *message = [NSString stringWithFormat:@&quot;Could not find index for %@&quot;, dictionaryKey];</div><div class="line">                </div><div class="line">                if (_logsErrors) &#123;</div><div class="line">                    NSLog(@&quot;%@&quot;, message);</div><div class="line">                &#125;</div><div class="line">                if (outErr) &#123;</div><div class="line">                    *outErr = [self errorWithMessage:message];</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    else &#123;</div><div class="line">        </div><div class="line">        while (idx &lt; queryCount) &#123;</div><div class="line">            </div><div class="line">            if (arrayArgs &amp;&amp; idx &lt; (int)[arrayArgs count]) &#123;</div><div class="line">                obj = [arrayArgs objectAtIndex:(NSUInteger)idx];</div><div class="line">            &#125;</div><div class="line">            else if (args) &#123;</div><div class="line">                obj = va_arg(args, id);</div><div class="line">            &#125;</div><div class="line">            else &#123;</div><div class="line">                //We ran out of arguments</div><div class="line">                break;</div><div class="line">            &#125;</div><div class="line">            </div><div class="line">            if (_traceExecution) &#123;</div><div class="line">                if ([obj isKindOfClass:[NSData class]]) &#123;</div><div class="line">                    NSLog(@&quot;data: %ld bytes&quot;, (unsigned long)[(NSData*)obj length]);</div><div class="line">                &#125;</div><div class="line">                else &#123;</div><div class="line">                    NSLog(@&quot;obj: %@&quot;, obj);</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">            </div><div class="line">            idx++;</div><div class="line">            </div><div class="line">            [self bindObject:obj toColumn:idx inStatement:pStmt];</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    ......</div><div class="line">    </div><div class="line">    /* Call sqlite3_step() to run the virtual machine. Since the SQL being</div><div class="line">     ** executed is not a SELECT statement, we assume no data will be returned.</div><div class="line">     */</div><div class="line">    </div><div class="line">    rc      = sqlite3_step(pStmt);</div><div class="line">    </div><div class="line">    if (SQLITE_DONE == rc) &#123;</div><div class="line">        // all is well, let&apos;s return.</div><div class="line">    &#125;</div><div class="line">    else if (rc == SQLITE_ROW) &#123;</div><div class="line">        NSString *message = [NSString stringWithFormat:@&quot;A executeUpdate is being called with a query string &apos;%@&apos;&quot;, sql];</div><div class="line">        .....</div><div class="line">    &#125;</div><div class="line">    else &#123;</div><div class="line">        if (outErr) &#123;</div><div class="line">            *outErr = [self errorWithMessage:[NSString stringWithUTF8String:sqlite3_errmsg(_db)]];</div><div class="line">        &#125;</div><div class="line">        </div><div class="line">        if (SQLITE_ERROR == rc) &#123;</div><div class="line">            if (_logsErrors) &#123;</div><div class="line">                NSLog(@&quot;Error calling sqlite3_step (%d: %s) SQLITE_ERROR&quot;, rc, sqlite3_errmsg(_db));</div><div class="line">                NSLog(@&quot;DB Query: %@&quot;, sql);</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        else if (SQLITE_MISUSE == rc) &#123;</div><div class="line">            // uh oh. 😄😓</div><div class="line">            if (_logsErrors) &#123;</div><div class="line">                NSLog(@&quot;Error calling sqlite3_step (%d: %s) SQLITE_MISUSE&quot;, rc, sqlite3_errmsg(_db));</div><div class="line">                NSLog(@&quot;DB Query: %@&quot;, sql);</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        else &#123;</div><div class="line">            // wtf? 黑人问号脸</div><div class="line">            if (_logsErrors) &#123;</div><div class="line">                NSLog(@&quot;Unknown error calling sqlite3_step (%d: %s) eu&quot;, rc, sqlite3_errmsg(_db));</div><div class="line">                NSLog(@&quot;DB Query: %@&quot;, sql);</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    ......</div><div class="line">    </div><div class="line">    int closeErrorCode;</div><div class="line">    </div><div class="line">    if (cachedStmt) &#123;</div><div class="line">        [cachedStmt setUseCount:[cachedStmt useCount] + 1];</div><div class="line">        closeErrorCode = sqlite3_reset(pStmt);</div><div class="line">    &#125;</div><div class="line">    else &#123;</div><div class="line">        closeErrorCode = sqlite3_finalize(pStmt); //释放资源</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    ......</div><div class="line">    </div><div class="line">    _isExecutingStatement = NO;</div><div class="line">    return (rc == SQLITE_DONE || rc == SQLITE_OK);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>这段代码虽然有点长，但是简单易懂，注释特别逗，特此挂出来，😄。</p>
+<h5 id="查询操作"><a href="#查询操作" class="headerlink" title="查询操作"></a>查询操作</h5><p>查询操作的实现方法如下，与更新操作的代码类似，所不同的是会返回<code>FMResultSet</code> 结果对象，拿到 <code>FMResultSet</code> 对象调用它的 next 方法就能依次拿到查询结果了。</p>
+<h5 id="事务操作"><a href="#事务操作" class="headerlink" title="事务操作"></a>事务操作</h5><p>如果需要启用事务，只需要调用 SQL 语句 <code>begin transaction</code> 然后 <code>commit transaction</code> 或者 <code>rollback transaction</code> 即可。FMDB 封装的实现如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div></pre></td><td class="code"><pre><div class="line">- (BOOL)rollback &#123;</div><div class="line">    BOOL b = [self executeUpdate:@&quot;rollback transaction&quot;];</div><div class="line">    </div><div class="line">    if (b) &#123;</div><div class="line">        _inTransaction = NO;</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    return b;</div><div class="line">&#125;</div><div class="line"></div><div class="line">- (BOOL)commit &#123;</div><div class="line">    BOOL b =  [self executeUpdate:@&quot;commit transaction&quot;];</div><div class="line">    </div><div class="line">    if (b) &#123;</div><div class="line">        _inTransaction = NO;</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    return b;</div><div class="line">&#125;</div><div class="line"></div><div class="line">- (BOOL)beginDeferredTransaction &#123;</div><div class="line">    </div><div class="line">    BOOL b = [self executeUpdate:@&quot;begin deferred transaction&quot;];</div><div class="line">    if (b) &#123;</div><div class="line">        _inTransaction = YES;</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    return b;</div><div class="line">&#125;</div><div class="line"></div><div class="line">- (BOOL)beginTransaction &#123;</div><div class="line">    </div><div class="line">    BOOL b = [self executeUpdate:@&quot;begin exclusive transaction&quot;]; //会启动 EXCLUSIVE 锁，其它任何线程都不能访问数据库了</div><div class="line">    if (b) &#123;</div><div class="line">        _inTransaction = YES;</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    return b;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>默认情况下，SQLite 是自动提交模式，也就是说对于数据库的修改操作都会打包成事务自动提交。而 SQLite 每秒能支持高达50000条的数据插入，但每秒只能支持几十个事务操作，所以在进行批量写入操作时可启用事务来提高写入性能。</p>
+<h5 id="线程安全"><a href="#线程安全" class="headerlink" title="线程安全"></a>线程安全</h5><p>FMDB 为了解决多线程访问数据库的线程安全问题，设计了<code>FMDatabaseQueue</code>类，使用方法很简单，初始化一个 <code>FMDatabaseQueue</code> 单例对象，即可在多线程中调用它的方法安全操作数据库了，其主要实现如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">- (void)inDatabase:(void (^)(FMDatabase *db))block &#123;</div><div class="line">    /* Get the currently executing queue (which should probably be nil, but in theory could be another DB queue</div><div class="line">     * and then check it against self to make sure we&apos;re not about to deadlock. */</div><div class="line">    FMDatabaseQueue *currentSyncQueue = (__bridge id)dispatch_get_specific(kDispatchQueueSpecificKey);//取出当前队列的标志</div><div class="line">    assert(currentSyncQueue != self &amp;&amp; &quot;inDatabase: was called reentrantly on the same queue, which would lead to a deadlock&quot;);</div><div class="line">    </div><div class="line">    FMDBRetain(self);</div><div class="line">    </div><div class="line">    dispatch_sync(_queue, ^() &#123;</div><div class="line">        </div><div class="line">        FMDatabase *db = [self database];</div><div class="line">        block(db);</div><div class="line">        </div><div class="line">        .....</div><div class="line">    &#125;);</div><div class="line">    </div><div class="line">    FMDBRelease(self);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>这里先判断是非在同一个队列中调用该方法，如果是的话则会断言提示在同一队列中嵌套调用该方法可能导致死锁，然后将数据库的操作放到串行队列中同步执行，以此避免线程安全问题。</p>
+<p>####参考</p>
+<ul>
+<li><a href="http://www.sqlite.org/threadsafe.html">Using SQLite In Multi-Threaded Applications</a></li>
+<li><a href="https://sqlite.org/faq.html">SQLite Frequently Asked Questions</a></li>
+</ul>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/iOS/">iOS</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="https://jianzhi.github.io/2017/07/08/iOS-数据库框架-FMDB-分析/" data-title="iOS 数据库框架 FMDB 分析 | Joey 的吉光片羽" data-tsina="null" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+
+<div class="next">
+<a href="/2017/06/25/iOS日志框架CocoaLumberjack分析/"  title="iOS日志框架CocoaLumberjack分析">
+ <strong>下一篇：</strong><br/> 
+ <span>iOS日志框架CocoaLumberjack分析
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="Show Sidebar"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">Contents</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#iOS-数据库-FMDB-框架分析"><span class="toc-number">1.</span> <span class="toc-text">iOS 数据库 FMDB 框架分析</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#主要的几个类："><span class="toc-number">1.0.0.1.</span> <span class="toc-text">主要的几个类：</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#创建数据库"><span class="toc-number">1.0.0.2.</span> <span class="toc-text">创建数据库</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#打开数据库"><span class="toc-number">1.0.0.3.</span> <span class="toc-text">打开数据库</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#执行更新操作"><span class="toc-number">1.0.0.4.</span> <span class="toc-text">执行更新操作</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#查询操作"><span class="toc-number">1.0.0.5.</span> <span class="toc-text">查询操作</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#事务操作"><span class="toc-number">1.0.0.6.</span> <span class="toc-text">事务操作</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#线程安全"><span class="toc-number">1.0.0.7.</span> <span class="toc-text">线程安全</span></a></li></ol></li></ol></li></ol></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="Hide Sidebar"></a></div>
+<aside class="clearfix">
+
+  
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">Categories</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/iOS编程/" title="iOS编程">iOS编程<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/生活/" title="生活">生活<sup>2</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">Tags</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/iOS/" title="iOS">iOS<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/HTTP-iOS/" title="HTTP , iOS">HTTP , iOS<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">Links</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="http://jacman.wuchong.me/2014/11/20/how-to-use-jacman/" target="_blank" title="如何使用 Jacman 主题">如何使用 Jacman 主题</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS</a>
+</div>
+
+  <div class="weiboshow">
+  <p class="asidetitle">Weibo</p>
+    <iframe width="100%" height="119" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=119&fansRow=2&ptype=1&speed=0&skin=9&isTitle=1&noborder=1&isWeibo=0&isFans=0&uid=null&verifier=&dpc=1"></iframe>
+</div>
+
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> Hello ,I&#39;m Joey. <br/>
+			</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2017 
+		
+		<a href="/about" target="_blank" title="Joey">Joey</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?e6d1f421bbc9962127a50488f9ed37d1";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="Back to Top"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>
